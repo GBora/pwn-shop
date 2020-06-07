@@ -31,7 +31,7 @@ function runScript(scriptPath, callback) {
 }
 
 const app = express();
-const port = 3300;
+const port = process.env.PORT || 3300;
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
