@@ -126,8 +126,36 @@ app.post('/signin', async (req, res) => {
     res.send(nodeBase64.encode(token));
 });
 
-app.post('/orders', async (req, res) => {
+app.get('/orders', async (req, res) => {
+    Database.open('./pwn.db')
+        .then(db => {
+            const sql = `SELECT * FROM ORDERS WHERE ID = "${ req.query.token }"`;
+            db.all(sql).then( result => {
+                res.render("orders", { products: result });
+            }).catch(err => {
+                console.error(err.message);
+            })
+        })
+        .catch(err => {
+            console.error(err.message);
+        });
+});
 
+app.post('/buy', async (req, res) => {
+    let order = req.body;
+
+    Database.open('./pwn.db')
+        .then(db => {
+            const sql = `INSERT INTO ORDERS (ID, SUM, NAME) VALUES ("${ order.token }",  ${ order.price } , " ${ order.name } ")`;
+            db.run(sql).then( result => {
+                res.send(true);
+            }).catch(err => {
+                console.error(err.message);
+            })
+        })
+        .catch(err => {
+            console.error(err.message);
+        })
 });
 
 app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`));

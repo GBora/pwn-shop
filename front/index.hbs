@@ -30,7 +30,7 @@
     <div class="w-100 border-bottom p-3 d-flex" id="header-user">
         <div class="h1 pt-3">Pwn Shop</div>
         <div class="ml-auto pt-3">
-            <a href="/orders" class="h3 pt-5">Orders</a>
+            <a class="h3 pt-5" onclick="orders()">Orders</a>
         </div>
     </div>
     <div class="container">
@@ -58,7 +58,7 @@
                         <td>{{{ this.DESCRIPTION }}}</td>
                         <td>{{{ this.PRICE }}}</td>
                         <td class="text-center">
-                            <button class="btn btn-primary">Buy</button>
+                            <button class="btn btn-primary" type="button" onclick="buy('{{ this.NAME }}', {{ this.PRICE }})">Buy</button>
                         </td>
                     </tr>
                 {{/each}}
@@ -99,6 +99,29 @@
     </div>
     <script>
 
+        let orders = () => {
+            window.location.href = '/orders?token=' + $.cookie('pwn');
+        };
+
+        let buy = (product, price) => {
+            $.ajax({
+                type: "POST",
+                url: "/buy",
+                data: { name: product, price: price, token: $.cookie("pwn") },
+                dataType: "json"
+            })
+        };
+
+        let hideLogin = () => {
+            $( '#header-login' ).addClass("d-none").removeClass("d-flex");
+            $( '#header-user' ).removeClass("d-none").addClass("d-flex");
+        };
+
+        let showLogin = () => {
+            $( '#header-login' ).removeClass("d-none").addClass("d-flex");
+            $( '#header-user' ).addClass("d-none").removeClass("d-flex");
+        };
+
         let signinHandler = () => {
             let username = window.btoa($( "#username" ).val());
             let password = window.btoa($( "#password" ).val());
@@ -110,23 +133,14 @@
             })
             .always(function (data) {
                 $.cookie("pwn", data.responseText);
-                $( '#header-login' ).addClass("d-none");
-                $( '#header-login' ).removeClass("d-flex");
-                $( '#header-user' ).removeClass("d-none");
-                $( '#header-user' ).addClass("d-flex");
+                hideLogin();
             })
         };
         $( document ).ready(function() {
            if ($.cookie('pwn')) {
-               $( '#header-login' ).addClass("d-none");
-               $( '#header-login' ).removeClass("d-flex");
-               $( '#header-user' ).removeClass("d-none");
-               $( '#header-user' ).addClass("d-flex");
+            hideLogin();
            } else {
-               $( '#header-login' ).removeClass("d-none");
-               $( '#header-login' ).addClass("d-flex");
-               $( '#header-user' ).addClass("d-none");
-               $( '#header-user' ).removeClass("d-flex");
+            showLogin();
            }
            $( "#login" ).click(signinHandler);
         });
